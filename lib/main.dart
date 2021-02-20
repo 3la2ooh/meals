@@ -1,15 +1,32 @@
 import 'package:flutter/material.dart';
-import 'package:meals/screens/meal_detail.dart';
 
 import './screens/category_meals_screen.dart';
 import './screens/categories_screen.dart';
+import './screens/filters_screen.dart';
+import './screens/meal_detail.dart';
+import './screens/tab_screen.dart';
+import './dummy_data.dart';
+import './models/meal.dart';
 
 void main() {
   runApp(MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   // This widget is the root of your application.
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  Map<String, bool> _filters = {
+    'gluten': false,
+    'lactose': false,
+    'vegan': false,
+    'vegetarian': false,
+  };
+  List<Meal> _availableMeals = DUMMY_MEALS;
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -33,36 +50,38 @@ class MyApp extends StatelessWidget {
               ),
             ),
       ),
-      home: MyHomePage(),
+      home: TabsScreen(),
       routes: {
-        CategoryMealsScreen.routeName: (context) => CategoryMealsScreen(),
+        CategoryMealsScreen.routeName: (context) =>
+            CategoryMealsScreen(this._availableMeals),
         MealDetail.routeName: (context) => MealDetail(),
+        FiltersScreen.routeName: (context) => FiltersScreen(
+              this._setFilters,
+              this._filters,
+            ),
       },
       // onGenerateRoute: (settings) {
-      //   // Generates a route if user tries to go to a route that does not exist in the routes table.
+      // Generates a route if user tries to go to a route that does not exist in the routes table.
       // },
       onUnknownRoute: (settings) {
+        // If for some reason an unknown named route is pushed
         return MaterialPageRoute(builder: (ctx) => CategoriesScreen());
       },
     );
   }
-}
 
-class MyHomePage extends StatefulWidget {
-  @override
-  _MyHomePageState createState() => _MyHomePageState();
-}
+  void _setFilters(Map<String, bool> filteredData) {
+    setState(() {
+      this._filters = filteredData;
 
-class _MyHomePageState extends State<MyHomePage> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Deli Meals'),
-      ),
-      body: Center(
-        child: CategoriesScreen(),
-      ),
-    );
+      this._availableMeals = DUMMY_MEALS.where((meal) {
+        if (this._filters['gluten'] && !meal.isGlutenFree) return false;
+        if (this._filters['lactose'] && !meal.isLactoseFree) return false;
+        if (this._filters['vegan'] && !meal.isVegan) return false;
+        if (this._filters['vegetarian'] && !meal.isVegetarian) return false;
+
+        return true;
+      }).toList();
+    });
   }
 }
