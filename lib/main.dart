@@ -38,6 +38,12 @@ class MyApp extends StatelessWidget {
         CategoryMealsScreen.routeName: (context) => CategoryMealsScreen(),
         MealDetail.routeName: (context) => MealDetail(),
       },
+      // onGenerateRoute: (settings) {
+      //   // Generates a route if user tries to go to a route that does not exist in the routes table.
+      // },
+      onUnknownRoute: (settings) {
+        return MaterialPageRoute(builder: (ctx) => CategoriesScreen());
+      },
     );
   }
 }
