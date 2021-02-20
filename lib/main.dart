@@ -26,6 +26,7 @@ class _MyAppState extends State<MyApp> {
     'vegetarian': false,
   };
   List<Meal> _availableMeals = DUMMY_MEALS;
+  List<Meal> _favoriteMeals = [];
 
   @override
   Widget build(BuildContext context) {
@@ -50,11 +51,14 @@ class _MyAppState extends State<MyApp> {
               ),
             ),
       ),
-      home: TabsScreen(),
+      home: TabsScreen(this._favoriteMeals),
       routes: {
         CategoryMealsScreen.routeName: (context) =>
             CategoryMealsScreen(this._availableMeals),
-        MealDetail.routeName: (context) => MealDetail(),
+        MealDetail.routeName: (context) => MealDetail(
+              this._toggleFavorite,
+              this._isMealFavorite,
+            ),
         FiltersScreen.routeName: (context) => FiltersScreen(
               this._setFilters,
               this._filters,
@@ -83,5 +87,28 @@ class _MyAppState extends State<MyApp> {
         return true;
       }).toList();
     });
+  }
+
+  bool _isMealFavorite(String mealId) {
+    return this._favoriteMeals.any((meal) {
+      return meal.id == mealId;
+    });
+  }
+
+  void _toggleFavorite(String mealId) {
+    final existingIndex =
+        this._favoriteMeals.indexWhere((meal) => meal.id == mealId);
+
+    if (existingIndex >= 0) {
+      setState(() {
+        this._favoriteMeals.removeAt(existingIndex);
+      });
+    } else {
+      setState(() {
+        this
+            ._favoriteMeals
+            .add(DUMMY_MEALS.firstWhere((meal) => meal.id == mealId));
+      });
+    }
   }
 }
